@@ -28,6 +28,28 @@ namespace API.Data
         // Summary:
         // Creates database set (table) named Users.
         public DbSet<AppUser> Users { get; set; }
-        
+        public DbSet<UserLike> Likes { get; set; }
+
+        // Creates framework for the "like" feature by creating relationships 
+        // between tables in our database.
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<UserLike>()
+                .HasKey(k => new {k.SourceUserId, k.LikedUserId});
+
+            builder.Entity<UserLike>()
+                .HasOne(s => s.SourceUser)
+                .WithMany(l => l.LikedUsers)
+                .HasForeignKey(s => s.SourceUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserLike>()
+                .HasOne(s => s.LikedUser)
+                .WithMany(l => l.LikedByUsers)
+                .HasForeignKey(s => s.LikedUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }  
     }
 }

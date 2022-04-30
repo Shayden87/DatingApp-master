@@ -30,7 +30,8 @@ namespace API.Services
             // Creates new claim for JWT token storing username under NameId.
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.NameId, user.UserName)
+                new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
             };
             // Creates new credentials with encryption key and security algorithm.
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
