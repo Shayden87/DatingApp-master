@@ -68,7 +68,7 @@ export class MembersService {
   getMember(username: string) {
     const member = [...this.memberCache.values()]
     .reduce((arr, elem) => arr.concat(elem.result), [])
-    .find((member: Member) => member.userName === username);
+    .find((member: Member) => member.username === username);
 
     if (member) {
       return of(member);
@@ -80,7 +80,7 @@ export class MembersService {
   updateMember(member: Member) {
     return this.http.put(this.baseUrl + 'users', member).pipe(
       map(() => {
-        const index =this.members.indexOf(member);
+        const index = this.members.indexOf(member);
         this.members[index] = member;
       })
     );

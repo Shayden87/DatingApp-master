@@ -36,7 +36,7 @@ namespace API.Controllers
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {   
             // Checks for existing user.
-            if (await UserExists(registerDto.UserName)) return BadRequest("Username is taken");
+            if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
             
             // Brings in all user properties from Dto.
             var user = _mapper.Map<AppUser>(registerDto);
@@ -45,7 +45,7 @@ namespace API.Controllers
             using var hmac = new HMACSHA512();
 
             // Creates new application user.
-            user.UserName = registerDto.UserName.ToLower();
+            user.UserName = registerDto.Username.ToLower();
             user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
             user.PasswordSalt = hmac.Key;
 
@@ -57,7 +57,7 @@ namespace API.Controllers
             // Returns UserDto that includes UserName and generated JWT token.
             return new UserDto
             {
-                UserName = user.UserName,
+                Username = user.UserName,
                 Token = _tokenService.CreateToken(user),
                 KnownAs = user.KnownAs,
                 Gender = user.Gender
@@ -78,7 +78,7 @@ namespace API.Controllers
             // Checks for user in database.
             var user = await _context.Users
                 .Include(p => p.Photos)
-                .SingleOrDefaultAsync(x => x.UserName == loginDto.UserName);
+                .SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
             // Validates user is not null.
             if (user == null) return Unauthorized("Invalid Username");
             // Provides hashing algorithms for PasswordSalt.
@@ -94,7 +94,7 @@ namespace API.Controllers
             // Returns UserDto that includes UserName and generated JWT token.
             return new UserDto
             {
-                UserName = user.UserName,
+                Username = user.UserName,
                 Token = _tokenService.CreateToken(user),
                 PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
                 KnownAs = user.KnownAs,

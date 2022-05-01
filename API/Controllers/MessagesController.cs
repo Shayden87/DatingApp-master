@@ -62,7 +62,6 @@ namespace API.Controllers
 
             // Else return bad request
             return BadRequest("Failed to send message");
-
         }
 
         [HttpGet]
@@ -84,6 +83,29 @@ namespace API.Controllers
             var currentUsername = User.GetUsername();
             
             return Ok(await _messageRepository.GetMessageThread(currentUsername, username));
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteMessage(int id)
+        {
+            // Get username.
+            var username = User.GetUsername();
+            // Get message.
+            var message = await _messageRepository.GetMessage(id);
+            // Check if message is from sender or recipient of message, if not no authorization.
+            if (message.Sender.UserName != username && message.Recipient.UserName != username)
+                return Unauthorized();
+            // Check if Sender is current user and set sender deleted to true.
+            if (message.Sender.UserName == username) message.SenderDeleted = true;
+            // Check if Recipient is current user and set recipient deleted to true.
+            if (message.Recipient.UserName == username) message.RecipientDeleted = true;
+            // If both sender and recipient deleted is true then delete from server.
+            if (message.SenderDeleted && message.RecipientDeleted) 
+                _messageRepository.DeleteMessage(message);
+            // Save all changes
+            if (await _messageRepository.SaveAllAsync()) return Ok();
+
+            return BadRequest("Problem deleting the message");
         }
     }
 }
