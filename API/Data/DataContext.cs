@@ -32,6 +32,8 @@ namespace API.Data
         // Creates database set (table) named Users.
         public DbSet<UserLike> Likes { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<Connection> Connections { get; set; }
 
         // Creates framework for the "like" feature by creating relationships 
         // between tables in our database.
