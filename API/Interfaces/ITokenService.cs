@@ -10,6 +10,6 @@ namespace API.Interfaces
     // Interface that provides functionality for creating Json web tokens.
     public interface ITokenService
     {
-        string CreateToken(AppUser user);
+        Task<string> CreateToken(AppUser user);
     }
 }

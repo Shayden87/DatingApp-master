@@ -32,7 +32,6 @@ namespace API.Controllers
             _mapper = mapper;
             _userRepository = userRepository;
         }
-        
         //  Summary:
         //  Gets all users.
         //  Remarks:

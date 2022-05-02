@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
@@ -12,7 +14,9 @@ namespace API.Data
     // 
     // Derived from DbContext class and allows injection of DataContext 
     // into other parts of the application.
-    public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<AppUser, AppRole, int, 
+        IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>,
+        IdentityRoleClaim<int>, IdentityUserToken<int>>
     {
         // Summary: 
         // Constructor that is called when DataContext class is initiated.
@@ -23,11 +27,9 @@ namespace API.Data
         //     The options for this context.
         public DataContext(DbContextOptions options) : base(options)
         {
-            
         }
         // Summary:
         // Creates database set (table) named Users.
-        public DbSet<AppUser> Users { get; set; }
         public DbSet<UserLike> Likes { get; set; }
         public DbSet<Message> Messages { get; set; }
 
@@ -36,6 +38,19 @@ namespace API.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // Define relationship between AppUser and UserRoles
+            builder.Entity<AppUser>()
+            .HasMany(ur => ur.UserRoles)
+            .WithOne(u => u.User)
+            .HasForeignKey(ur => ur.UserId)
+            .IsRequired();
+            // Define relationship between AppRole and UserRoles
+            builder.Entity<AppRole>()
+            .HasMany(ur => ur.UserRoles)
+            .WithOne(u => u.Role)
+            .HasForeignKey(ur => ur.RoleId)
+            .IsRequired();
 
             builder.Entity<UserLike>()
                 .HasKey(k => new {k.SourceUserId, k.LikedUserId});

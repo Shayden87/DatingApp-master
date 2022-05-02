@@ -9,6 +9,7 @@ using API.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Services
 {
@@ -18,14 +19,16 @@ namespace API.Services
     {
         // Implements encryption that utilizes the same key to sign JWT token and verify signature.
         private readonly SymmetricSecurityKey _key;
+        private readonly UserManager<AppUser> _userManager;
         // Creates new encryption key.
-        public TokenService(IConfiguration config)
+        public TokenService(IConfiguration config, UserManager<AppUser> userManager)
         {
+            _userManager = userManager;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
         }
         // Summary:
         // Method for creation of JWT tokens
-        public string CreateToken(AppUser user)
+        public async Task<string> CreateToken(AppUser user)
         {
             // Creates new claim for JWT token storing username under NameId.
             var claims = new List<Claim>
@@ -33,6 +36,11 @@ namespace API.Services
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
             };
+
+            // Get user roles.
+            var roles = await _userManager.GetRolesAsync(user);
+            // Add roles into list of claims.
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
             // Creates new credentials with encryption key and security algorithm.
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
             // Describes token with subject(included claims), expiration, and signing credentials.
