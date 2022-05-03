@@ -30,6 +30,7 @@ namespace API.Data
         //     The options for this context.
         public DataContext(DbContextOptions options) : base(options)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestapBehavior", true);
         }
         // Summary:
         // Creates database set (table) named Users.
